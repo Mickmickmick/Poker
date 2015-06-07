@@ -1,0 +1,22 @@
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\MainWindow.baml
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\MainWindow.g.cs
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\App.g.cs
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\WPFapplication_MarkupCompile.cache
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\WPFapplication.g.resources
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\WPFapplication.Properties.Resources.resources
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\WPFapplication.csproj.GenerateResource.Cache
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\bin\Debug\WPFapplication.exe
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\bin\Debug\WPFapplication.pdb
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\WPFapplication.exe
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Debug\WPFapplication.pdb
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\WPFapplication.exe
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\WPFapplication.pdb
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\MainWindow.baml
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\MainWindow.g.cs
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\App.g.cs
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\WPFapplication_MarkupCompile.cache
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\WPFapplication.g.resources
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\WPFapplication.Properties.Resources.resources
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Debug\WPFapplication.csproj.GenerateResource.Cache
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\bin\Debug\WPFapplication.exe
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\bin\Debug\WPFapplication.pdb

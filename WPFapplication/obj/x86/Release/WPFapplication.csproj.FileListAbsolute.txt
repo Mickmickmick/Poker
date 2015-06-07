@@ -1,0 +1,22 @@
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\MainWindow.baml
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\MainWindow.g.cs
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\App.g.cs
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\WPFapplication_MarkupCompile.cache
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\WPFapplication.g.resources
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\WPFapplication.Properties.Resources.resources
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\WPFapplication.csproj.GenerateResource.Cache
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\bin\Release\WPFapplication.exe
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\bin\Release\WPFapplication.pdb
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\WPFapplication.exe
+C:\Users\Mick\AppData\Local\Temporary Projects\WPFapplication\obj\x86\Release\WPFapplication.pdb
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\MainWindow.baml
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\MainWindow.g.cs
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\App.g.cs
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\WPFapplication_MarkupCompile.cache
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\WPFapplication.g.resources
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\WPFapplication.Properties.Resources.resources
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\WPFapplication.csproj.GenerateResource.Cache
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\WPFapplication.pdb
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\bin\Release\WPFapplication.exe
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\bin\Release\WPFapplication.pdb
+C:\Users\Mick\documents\visual studio 2010\Projects\WPFapplication\WPFapplication\obj\x86\Release\WPFapplication.exe
