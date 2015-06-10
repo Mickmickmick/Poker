@@ -55,12 +55,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AI.cs" />
-    <Compile Include="AI_Postflop.cs" />
-    <Compile Include="AI_Preflop.cs" />
-    <Compile Include="IOpponentModel.cs" />
-    <Compile Include="OpponentModel.cs" />
-    <Compile Include="OpponentModel_DEFAULT.cs" />
+    <Compile Include="AI\AI.cs" />
+    <Compile Include="AI\AI_Postflop.cs" />
+    <Compile Include="AI\AI_Preflop.cs" />
+    <Compile Include="AI\OpponentModel_SECOND_ORDER.cs" />
+    <Compile Include="AI\IOpponentModel.cs" />
+    <Compile Include="AI\OpponentModel_FIRST_ORDER.cs" />
+    <Compile Include="AI\OpponentModel_DEFAULT.cs" />
     <Compile Include="StandardHands.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -105,8 +106,9 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="workflow\" />
+    <Resource Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

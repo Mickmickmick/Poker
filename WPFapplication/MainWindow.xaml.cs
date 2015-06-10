@@ -158,7 +158,14 @@ namespace WPFapplication
         // Initialize
         public MainWindow()
         {
+      //      Uri uri = new Uri(@"..\..\Images\Background.png", UriKind.Relative);
+      //      PngBitmapDecoder decoder2 = new PngBitmapDecoder(uri, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
             InitializeComponent();
+            InitializeGame();
+        }
+
+        private void InitializeGame()
+        {
 
             int begin_stack = 1500;
 
@@ -176,6 +183,12 @@ namespace WPFapplication
         // New hand (eventually could be automatic)
         private void New_Hand_clicked(object sender, RoutedEventArgs e)
         {
+            if ((string)newhand.Content == "New Game")
+            {
+                InitializeGame();
+                newhand.Content = "New Hand";
+                return;
+            }
             newhand.IsEnabled = false;
             Villain1.Source = Card.BackSrc();
             Villain2.Source = Card.BackSrc();
@@ -324,7 +337,7 @@ namespace WPFapplication
 
         void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            e.Result = Villain.GetMove(Mr_Brown);
+            e.Result = Villain.GetMove(Mr_Brown, betStep);
         }
 
         void bgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -373,6 +386,12 @@ namespace WPFapplication
             {
                 BetRound();
             }
+        }
+
+        private bool IsPlayersFirstTurn()
+        {
+            return (Mr_Brown.players[0].PotCommit == 10 && Mr_Brown.dealer_button.PlayerID == PLAYER.User)
+                || (Mr_Brown.players[0].PotCommit == 20 && Mr_Brown.dealer_button.PlayerID != PLAYER.User);
         }
 
         #region GUI stuff
@@ -436,7 +455,16 @@ namespace WPFapplication
             }
 
             //NoButtonsGUI();
-            newhand.Visibility = Visibility.Visible;
+            if (Mr_Brown.players[0].StackSize != 0 && Mr_Brown.players[1].StackSize != 0)
+                newhand.Visibility = Visibility.Visible;
+
+            else
+            {
+                string winnerstring = Mr_Brown.players[0].StackSize == 0 ? Mr_Brown.players[1].PlayerID.ToString() : Mr_Brown.players[0].PlayerID.ToString();
+                villainActText.Text = "Game over, " + winnerstring + " won!";
+                newhand.Content = "New Game";
+                newhand.Visibility = Visibility.Visible;
+            }
 
             UpdateTable();
         }
@@ -529,14 +557,23 @@ namespace WPFapplication
 
         private void Check_Call_clicked(object sender, RoutedEventArgs e)
         {
+            int bet = Mr_Brown.players[1].PotCommit - Mr_Brown.players[0].PotCommit;
+
+            if (bet == 0)
+                Villain.UpdateMove(MOVE.check, DeterminePhase(Mr_Brown), betStep, IsPlayersFirstTurn());
+            else
+                Villain.UpdateMove(MOVE.call, DeterminePhase(Mr_Brown), betStep, IsPlayersFirstTurn());
+
             NoButtonsGUI();
             noBetPlaced = true;
-            Mr_Brown.AcceptBet(Mr_Brown.players[0], Mr_Brown.players[1].PotCommit - Mr_Brown.players[0].PotCommit);
+            Mr_Brown.AcceptBet(Mr_Brown.players[0], bet);
+
             BetRound();
         }
 
         private void Fold_clicked(object sender, RoutedEventArgs e)
         {
+            Villain.UpdateMove(MOVE.fold, DeterminePhase(Mr_Brown), betStep, IsPlayersFirstTurn());
             betStep = 100;
             noBetPlaced = true;
             NoButtonsGUI();
@@ -544,6 +581,7 @@ namespace WPFapplication
             BetRound();
         }
 
+ 
 
         public void RaiseWheel(object sender, MouseWheelEventArgs e)
         {
@@ -569,13 +607,26 @@ namespace WPFapplication
 
         private void RaiseButton_Click(object sender, RoutedEventArgs e)
         {
+            Villain.UpdateMove(MOVE.bet_raise, DeterminePhase(Mr_Brown), betStep, IsPlayersFirstTurn());
             NoButtonsGUI();
             noBetPlaced = false;
             Mr_Brown.AcceptBet(Mr_Brown.players[0], (int)RaiseSlider.Value);
+            
             BetRound();
         }
 
 
+        private GAME_STATE DeterminePhase(Dealer Mr_Brown)
+        {
+            if (Mr_Brown.c.Count == 0)
+                return GAME_STATE.preflop;
+            if (Mr_Brown.c.Count == 3)
+                return GAME_STATE.flop;
+            if (Mr_Brown.c.Count == 4)
+                return GAME_STATE.turn;
+            else
+                return GAME_STATE.river;
+        }
     }
 
     public class DoubleToIntConverter : IValueConverter
@@ -590,4 +641,5 @@ namespace WPFapplication
             throw new NotImplementedException();
         }
     }
+
 }

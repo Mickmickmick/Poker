@@ -161,4 +161,15 @@ namespace GameMechanics
         river,
         wrapup
     }
+
+    /// <summary>
+    /// Enum for hand history
+    /// </summary>
+    public enum MOVE
+    {
+        fold,
+        check,
+        call,
+        bet_raise
+    }
 }

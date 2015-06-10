@@ -1,12 +1,12 @@
-﻿ - Flop en Turn info meenemen
+﻿ -// Flop en Turn info meenemen
  
  - Paths fixen van images (relatief ipv absoluut)
 
- - Uploaden naar GIT achtig iets
+ -// Uploaden naar GIT achtig iets
 
  - Release proberen te maken
 
- - 'Loose-heids' factor inbouwen (2nd order potm)
+ -// 'Loose-heids' factor inbouwen (2nd order potm)
 
  - Overwegen tegen zichzelf te laten spelen
 
