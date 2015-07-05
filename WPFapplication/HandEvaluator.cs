@@ -21,6 +21,7 @@ namespace GameMechanics
             composition = sets_class.best_hand;
             rank = sets_class.hand_rank;
 
+            /*
             // Check straight flush
             if (flush_class.in_hand && straight_class.in_hand)
             {
@@ -32,6 +33,7 @@ namespace GameMechanics
                     return;
                 }
             }
+             */
             // If full house / quads
             if (sets_class.hand_rank > COLLECTION_RANKS.flush)
                 return;
@@ -60,9 +62,11 @@ namespace GameMechanics
         public static bool IsBetterHand(CardList hole, CardList comm_cards, CardList vil)
         {
             CardList hero_cards = hole.copy().Concat(comm_cards);
+
             CardList villain_cards = vil.copy().Concat(comm_cards);
 
             HandEvaluator hero_strength = new HandEvaluator(hero_cards);
+
             HandEvaluator villain_strength = new HandEvaluator(villain_cards);
 
             if ((int)hero_strength.rank > (int)villain_strength.rank)
@@ -77,6 +81,7 @@ namespace GameMechanics
                 if ((int)hero_strength.composition[i].rank < (int)villain_strength.composition[i].rank)
                     return false;
             }
+
             // Return null if split 
             return true;
         }
@@ -136,6 +141,7 @@ namespace GameMechanics
 
         public sets(CardList cards)
         {
+            cards = cards.copy();
             List<int> set_list = new List<int>(4){0,0,0,0};
             
             // Group the cards by rank and put their ranks in tuples with an occurence count
@@ -190,6 +196,7 @@ namespace GameMechanics
         // Constrcutor
         public straight(CardList cards)
         {
+            cards = cards.copy();
             // First extract the ranks from the hand and remove duplicates
             List<CARD_RANK> ranks_list = cards.Select(s => s.rank).OrderBy(o => o).Reverse().Distinct().ToList();
             if (ranks_list[0] == CARD_RANK.ace)
@@ -236,6 +243,7 @@ namespace GameMechanics
         // Constructor
         public flush(CardList cards)
         {
+            cards = cards.copy();
             // First extract the suits from the hand and group them
             // Sort list so the most occurent suit is at index=0
             // Check if count of index=0 is >=5           

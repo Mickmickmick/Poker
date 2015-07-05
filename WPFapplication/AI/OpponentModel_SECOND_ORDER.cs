@@ -16,17 +16,18 @@ namespace Villain
             double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
                          Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
             double randNormal =
-                         1.0 + 0.2 * randStdNormal; //random normal(mean,stdDev^2)
+                         1.2 + 0.2 * randStdNormal; //random normal(mean,stdDev^2)
             return randNormal;
         }
 
         /***************************************
          * General
          * *************************************/
-        private double _loosenessFactor = 1.2;
-        public double loosenessFactor {
-            get { return _loosenessFactor * randNormDistr(); } 
-            set { _loosenessFactor = value; } 
+        private double _loosenessFactor = 1.0;
+        public double loosenessFactor
+        {
+            get { return _loosenessFactor * randNormDistr(); }
+            set { _loosenessFactor = value; }
         }
 
         string startTime;
@@ -74,7 +75,7 @@ namespace Villain
                     currentHandHistory.Clear();
                 }
             }
-            
+
             if (gamestate != current_game_state)
             {
                 if (currentStreetHistory != null && currentStreetHistory.Count != 0)
@@ -93,7 +94,7 @@ namespace Villain
         /// <returns></returns>
         public double CurrentAggresiveness()
         {
-            
+
             if (currentHandHistory.Count == 0)
                 return 0.4;
 
@@ -127,7 +128,7 @@ namespace Villain
                 return 0.4;
 
             double totalAggr = 0;
-            
+
             //Loop through hands
             for (int i = 0; i < moveHistory.Count; i++)
             {
@@ -158,12 +159,13 @@ namespace Villain
          * *************************************/
 
         // default values
-        List<int> preflopCommits = new List<int>(18) { 400, 200, 100, 60, 60, 60, 60, 40, 40, 40, 40, 20, 20, 20, 0, 0, 0, 0 };
+        List<int> preflopCommits = OpponentModel_START_VALUES.preflopCommits;
 
-        public int currentRange;
+        public int currentRange { get; set; }
 
         public double addPreflopCommit(int amount)
         {
+
             preflopCommits.Add(amount);
             preflopCommits = preflopCommits.OrderByDescending(k => k).ToList();
 
@@ -173,10 +175,10 @@ namespace Villain
             return ((first + last) / 2.0) / preflopCommits.Count;
         }
 
-      /***************************************
-      * FLOP
-      * *************************************/
-        List<double> flopCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        /***************************************
+        * FLOP
+        * *************************************/
+        List<double> flopCommitsACTIVE = OpponentModel_START_VALUES.flopCommitsACTIVE;
 
         /// <summary>
         /// 
@@ -194,7 +196,7 @@ namespace Villain
             return ((first + last) / 2.0) / flopCommitsACTIVE.Count;
         }
 
-        List<double> flopCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> flopCommitsPASSIVE = OpponentModel_START_VALUES.flopCommitsPASSIVE;
 
         /// <summary>
         /// 
@@ -217,10 +219,10 @@ namespace Villain
             return loosenessFactor * ((double)flopCommitsPASSIVE.FindAll(k => k == 0).Count / (double)flopCommitsPASSIVE.Count);
         }
 
-     /***************************************
-     * TURN
-     * *************************************/
-        List<double> turnCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        /***************************************
+        * TURN
+        * *************************************/
+        List<double> turnCommitsACTIVE = OpponentModel_START_VALUES.turnCommitsACTIVE;
 
         /// <summary>
         /// 
@@ -238,7 +240,7 @@ namespace Villain
             return ((first + last) / 2.0) / turnCommitsACTIVE.Count;
         }
 
-        List<double> turnCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> turnCommitsPASSIVE = OpponentModel_START_VALUES.turnCommitsPASSIVE;
 
         /// <summary>
         /// 
@@ -256,15 +258,18 @@ namespace Villain
             return ((first + last) / 2.0) / turnCommitsPASSIVE.Count;
         }
 
-        public double foldChanceTURN()
+        public double foldChanceTURN(List<double> current_hand_style)
         {
-            return loosenessFactor * ((double)turnCommitsPASSIVE.FindAll(k => k == 0).Count / (double)turnCommitsPASSIVE.Count);
+            return loosenessFactor *
+                ((((double)turnCommitsPASSIVE.FindAll(k => k == 0).Count / (double)turnCommitsPASSIVE.Count)
+                + 0.5 * current_hand_style[current_hand_style.Count - 1]
+                )) / 2;
         }
 
         /***************************************
         * RIVER
         * *************************************/
-        List<double> riverCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> riverCommitsACTIVE = OpponentModel_START_VALUES.turnCommitsACTIVE;
 
         /// <summary>
         /// 
@@ -282,7 +287,7 @@ namespace Villain
             return ((first + last) / 2.0) / riverCommitsACTIVE.Count;
         }
 
-        List<double> riverCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> riverCommitsPASSIVE = OpponentModel_START_VALUES.riverCommitsPASSIVE;
 
         /// <summary>
         /// 
@@ -300,10 +305,15 @@ namespace Villain
             return ((first + last) / 2.0) / riverCommitsPASSIVE.Count;
         }
 
-        public double foldChanceRIVER()
+        public double foldChanceRIVER(List<double> current_hand_style)
         {
-            return loosenessFactor * ((double)riverCommitsPASSIVE.FindAll(k => k == 0).Count / (double)riverCommitsPASSIVE.Count);
+            return loosenessFactor *
+                ((((double)riverCommitsPASSIVE.FindAll(k => k == 0).Count / (double)riverCommitsPASSIVE.Count)
+                + 0.5 * current_hand_style[current_hand_style.Count - 1]
+                + 0.5 * current_hand_style[current_hand_style.Count - 2]
+                )) / 3;
         }
-    
+
     }
+
 }

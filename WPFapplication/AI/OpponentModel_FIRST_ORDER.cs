@@ -143,12 +143,13 @@ namespace Villain
          * *************************************/
 
         // default values
-        List<int> preflopCommits = new List<int>(18) { 400, 200, 100, 60, 60, 60, 60, 40, 40, 40, 40, 20, 20, 20, 0, 0, 0, 0 };
+        List<int> preflopCommits = OpponentModel_START_VALUES.preflopCommits;
 
-        public int currentRange;
+        public int currentRange { get; set; }
 
         public double addPreflopCommit(int amount)
         {
+            
             preflopCommits.Add(amount);
             preflopCommits = preflopCommits.OrderByDescending(k => k).ToList();
 
@@ -161,7 +162,7 @@ namespace Villain
       /***************************************
       * FLOP
       * *************************************/
-        List<double> flopCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> flopCommitsACTIVE = OpponentModel_START_VALUES.flopCommitsACTIVE;
 
         /// <summary>
         /// 
@@ -179,7 +180,7 @@ namespace Villain
             return ((first + last) / 2.0) / flopCommitsACTIVE.Count;
         }
 
-        List<double> flopCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> flopCommitsPASSIVE = OpponentModel_START_VALUES.flopCommitsPASSIVE;
 
         /// <summary>
         /// 
@@ -205,7 +206,7 @@ namespace Villain
      /***************************************
      * TURN
      * *************************************/
-        List<double> turnCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> turnCommitsACTIVE = OpponentModel_START_VALUES.turnCommitsACTIVE;
 
         /// <summary>
         /// 
@@ -223,7 +224,7 @@ namespace Villain
             return ((first + last) / 2.0) / turnCommitsACTIVE.Count;
         }
 
-        List<double> turnCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> turnCommitsPASSIVE = OpponentModel_START_VALUES.turnCommitsPASSIVE;
 
         /// <summary>
         /// 
@@ -241,15 +242,18 @@ namespace Villain
             return ((first + last) / 2.0) / turnCommitsPASSIVE.Count;
         }
 
-        public double foldChanceTURN()
+        public double foldChanceTURN(List<double> current_hand_style)
         {
-            return loosenessFactor * ((double)turnCommitsPASSIVE.FindAll(k => k == 0).Count / (double)turnCommitsPASSIVE.Count);
+            return loosenessFactor * 
+                ((((double)turnCommitsPASSIVE.FindAll(k => k == 0).Count / (double)turnCommitsPASSIVE.Count)
+                + 0.5 * current_hand_style[current_hand_style.Count - 1]
+                )) / 2;
         }
 
         /***************************************
         * RIVER
         * *************************************/
-        List<double> riverCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> riverCommitsACTIVE = OpponentModel_START_VALUES.turnCommitsACTIVE;
 
         /// <summary>
         /// 
@@ -267,7 +271,7 @@ namespace Villain
             return ((first + last) / 2.0) / riverCommitsACTIVE.Count;
         }
 
-        List<double> riverCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> riverCommitsPASSIVE = OpponentModel_START_VALUES.riverCommitsPASSIVE;
 
         /// <summary>
         /// 
@@ -285,14 +289,15 @@ namespace Villain
             return ((first + last) / 2.0) / riverCommitsPASSIVE.Count;
         }
 
-        public double foldChanceRIVER()
+        public double foldChanceRIVER(List<double> current_hand_style)
         {
-            return loosenessFactor * ((double)riverCommitsPASSIVE.FindAll(k => k == 0).Count / (double)riverCommitsPASSIVE.Count);
+            return loosenessFactor *
+                ((((double)riverCommitsPASSIVE.FindAll(k => k == 0).Count / (double)riverCommitsPASSIVE.Count)
+                + 0.5 * current_hand_style[current_hand_style.Count - 1]
+                + 0.5 * current_hand_style[current_hand_style.Count - 2]
+                )) / 3;
         }
     
     }
-
-
-
 
 }

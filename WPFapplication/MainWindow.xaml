@@ -88,7 +88,7 @@
                 <!-- Villain name & Score -->
                 <StackPanel Margin="10 50 50 20" Background="Black" DockPanel.Dock="Right" >
                     <Border BorderThickness="1 1 1 1" BorderBrush="White" >
-                        <TextBlock FontSize="20" HorizontalAlignment="Center" Foreground="White" Padding="30 7 30 4" Text="Mick"  />
+                        <TextBlock FontSize="20" HorizontalAlignment="Center" Foreground="White" Padding="30 7 30 4" Text="Player"  />
                     </Border>
                     <Border BorderThickness="1 0 1 1" BorderBrush="White">
                         <TextBlock FontSize="20" HorizontalAlignment="Center" Foreground="White" Padding="30 4 30 7" Text="1300" x:Name="HeroStack" DockPanel.Dock="Right" />

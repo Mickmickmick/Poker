@@ -10,7 +10,12 @@ namespace Villain
 {
     public partial class AI
     {
-        private int lastBet = 0;
+        private int tp;
+        private int op;
+        private int betStep;
+        private List<double> commits_ranges_current_hand = new List<double>();
+
+        private double lastBet = 0;
 
         //Function to get random number
         private static readonly Random random = new Random();
@@ -26,10 +31,10 @@ namespace Villain
         Array ranks = Enum.GetValues(typeof(CARD_RANK));
         Array suits = Enum.GetValues(typeof(CARD_SUIT));
 
-        OpponentModel_FIRST_ORDER opponentmodel = new OpponentModel_FIRST_ORDER();
+        IOpponentModel opponentmodel;
 
         GAME_STATE _phase;
-        GAME_STATE phase
+        public GAME_STATE phase
         {
             get
             {
@@ -42,15 +47,25 @@ namespace Villain
             }
         }
         bool am_dealer;
-        bool firstMoveOfRound;
+        bool firstMoveOfRound = true;
 
         bool firstTimeFlop = true;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public AI()
+        public AI(int order, int player)
         {
+            if (order == 0)
+                opponentmodel = new OpponentModel_DEFAULT();
+            else if (order == 1)
+                opponentmodel = new OpponentModel_FIRST_ORDER();
+            else
+                opponentmodel = new OpponentModel_SECOND_ORDER();
+
+            tp = player;
+            op = player == 0 ? 1 : 0;
+
             ALL_TIERS.Add(Tier1);
             ALL_TIERS.Add(Tier2);
             ALL_TIERS.Add(Tier3);
@@ -71,26 +86,31 @@ namespace Villain
         /// </summary>
         /// <param name="Mr_Brown"></param>
         /// <returns></returns>
-        public int GetMove(Dealer Mr_Brown, int betStep)
+        public int GetMove(Dealer Mr_Brown, int bs)
         {
+            betStep = bs;
             phase = DeterminePhase(Mr_Brown);
-            am_dealer = Mr_Brown.dealer_button.PlayerID == PLAYER.Computer;
+            am_dealer = (Mr_Brown.dealer_button.PlayerID == PLAYER.Computer) == (tp == 1);
 
-            if (firstMoveOfRound && lastBet > 0)
+            if (firstMoveOfRound)
             {
                 if (phase == GAME_STATE.turn)
-                    opponentmodel.addFlopRangeCommitPASSIVE(lastBet);
+                    commits_ranges_current_hand.Add(opponentmodel.addFlopRangeCommitPASSIVE(lastBet));
                 if (phase == GAME_STATE.river)
-                    opponentmodel.addTurnRangeCommitPASSIVE(lastBet);
+                    commits_ranges_current_hand.Add(opponentmodel.addTurnRangeCommitPASSIVE(lastBet));
                 if (phase == GAME_STATE.wrapup)
-                    opponentmodel.addRiverRangeCommitPASSIVE(lastBet);
+                    commits_ranges_current_hand.Add(opponentmodel.addRiverRangeCommitPASSIVE(lastBet));
             }
 
             int amount = 0;
 
+            
+
+            if (phase == GAME_STATE.preflop && firstMoveOfRound)
+                commits_ranges_current_hand.Clear();
+
             if (phase == GAME_STATE.preflop)
                 amount = preflop_action(Mr_Brown);
-
             else
             {
                 if (firstTimeFlop)
@@ -100,13 +120,13 @@ namespace Villain
             }
 
             #region amount-verification
-            int opponentBet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
-            int small_stack = opponentBet + Mr_Brown.players[0].StackSize < Mr_Brown.players[1].StackSize ? Mr_Brown.players[0].StackSize : Mr_Brown.players[1].StackSize;
+            int opponentBet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
+            int small_stack = opponentBet + Mr_Brown.players[op].StackSize < Mr_Brown.players[tp].StackSize ? Mr_Brown.players[op].StackSize : Mr_Brown.players[tp].StackSize;
             
             // if raised
-            if (Mr_Brown.players[1].PotCommit + amount > Mr_Brown.players[0].PotCommit)
+            if (Mr_Brown.players[tp].PotCommit + amount > Mr_Brown.players[op].PotCommit)
             {
-                if ((Mr_Brown.players[1].PotCommit + amount) - Mr_Brown.players[0].PotCommit < 20)
+                if ((Mr_Brown.players[tp].PotCommit + amount) - Mr_Brown.players[op].PotCommit < 20)
                     amount = 20;
             }
 
@@ -114,7 +134,7 @@ namespace Villain
                 amount = 20;
 
             // a call of 10 is possible preflop on the button
-            if (amount <= 10 && Mr_Brown.players[1].PotCommit != 10)                
+            if (amount <= 10 && Mr_Brown.players[tp].PotCommit != 10)                
                 amount = 0;
 
             if (amount > small_stack)
@@ -122,8 +142,8 @@ namespace Villain
             #endregion
 
             // if AI betted
-            int bet = (amount + Mr_Brown.players[1].PotCommit) -  Mr_Brown.players[0].PotCommit;
-            lastBet = bet > 0 ? bet : 0;
+            int bet = Mr_Brown.players[op].PotCommit - (amount + Mr_Brown.players[tp].PotCommit);
+            lastBet = bet > 0 ? bet / Mr_Brown.pot : 0;
 
             return amount;
 

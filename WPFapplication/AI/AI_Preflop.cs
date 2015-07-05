@@ -11,17 +11,25 @@ namespace Villain
     /// </summary>
     partial class AI
     {
+        private int pfc;
+
+        public void preflopcommit(Dealer Mr_Brown)
+        {
+            int amount = Mr_Brown.players[op].PotCommit;
+            if (Mr_Brown.c.Count == 0)
+                pfc = amount;
+        }
 
         private int eval_preflop(Dealer Mr_Brown)
         {
             firstTimeFlop = false;
-            int amount = Mr_Brown.players[0].PotCommit;
+            int amount = pfc;
             double perc = opponentmodel.addPreflopCommit(amount);
-
+            commits_ranges_current_hand.Add(perc);
             double closest = 1;
             for (int i = 0; i < Occurrencies.Count; ++i)
             {
-                if (Math.Abs(Occurrencies[i] - amount) < Math.Abs(closest - amount)) closest = Occurrencies[i];
+                if (Math.Abs(Occurrencies[i] - perc) < Math.Abs(closest - perc)) closest = Occurrencies[i];
             }
             return Occurrencies.FindIndex(k => k == closest) + 1;
         }
@@ -29,10 +37,10 @@ namespace Villain
         private int preflop_action(Dealer Mr_Brown)
         {            
             firstTimeFlop = true;
-            int tier = RankHoleCards(Mr_Brown.players[1].HoleCards);
+            int tier = RankHoleCards(Mr_Brown.players[tp].HoleCards);
             if (am_dealer)
                 return preflop_inpos(Mr_Brown, tier);
-            return preflop_outpos(Mr_Brown, tier, Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit);            
+            return preflop_outpos(Mr_Brown, tier, Mr_Brown.players[op].PotCommit == Mr_Brown.players[tp].PotCommit);            
         }
 
         #region Dealer button
@@ -46,9 +54,9 @@ namespace Villain
         private int preflop_inpos(Dealer Mr_Brown, int tier)
         {
             // amount to call
-            int opponentBet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponentBet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             // is this the first action?
-            bool firstbet = Mr_Brown.players[1].PotCommit == 10;
+            bool firstbet = Mr_Brown.players[tp].PotCommit == 10;
 
             // 3 bet
             if (tier <= 3)
@@ -102,7 +110,7 @@ namespace Villain
         /// <returns></returns>
         private int preflop_outpos_initiative_there(Dealer Mr_Brown, int tier)
         {
-            int opponentBet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponentBet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
 
  
 
@@ -114,7 +122,8 @@ namespace Villain
             }
             if (tier < 9 && opponentBet <= 50)
                 return opponentBet;
-            return 0;
+            int r = RandomNumber(10) >= 5 && opponentBet <= 55 ? opponentBet : 0;
+            return r;
         }
 
         /// <summary>

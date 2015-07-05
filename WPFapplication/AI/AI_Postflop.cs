@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GameMechanics;
+using System.Threading.Tasks;
 
 namespace Villain
 {
@@ -28,17 +29,17 @@ namespace Villain
         /// <returns></returns>
         private int flop_action(Dealer Mr_Brown)
         {
-            double potpercbet = (double)(Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit) / (double)Mr_Brown.pot;
+            double potpercbet = (double)(Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit) / (double)(2 * Mr_Brown.players[tp].PotCommit);
             // Checked towards me
-            if (am_dealer && Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+            if (am_dealer && Mr_Brown.players[op].PotCommit == Mr_Brown.players[tp].PotCommit)
             {
-                opponentmodel.addFlopRangeCommitACTIVE(0);
+                commits_ranges_current_hand.Add(opponentmodel.addFlopRangeCommitACTIVE(0));
                 return flop_action_inpos_passive(Mr_Brown);
             }
             // Betted / raised towards me
             if (am_dealer)
             {
-                opponentmodel.addFlopRangeCommitACTIVE(potpercbet);
+                commits_ranges_current_hand.Add(opponentmodel.addFlopRangeCommitACTIVE(potpercbet));
                 return flop_action_inpos_active(Mr_Brown);
             }
             // My move; no action yet
@@ -47,7 +48,7 @@ namespace Villain
             // My move; respond to bet / raise
             else
             {
-                opponentmodel.addFlopRangeCommitPASSIVE(potpercbet);
+                commits_ranges_current_hand.Add(opponentmodel.addFlopRangeCommitPASSIVE(potpercbet));
                 return flop_action_outpos_active(Mr_Brown);
             }
         }
@@ -59,14 +60,17 @@ namespace Villain
         /// <returns></returns>
         private int flop_action_inpos_passive(Dealer Mr_Brown)
         {
-            double fold_or_win_chance = WinOrFoldChanceFLOP(Mr_Brown);
+            // if winchance is really high, raise
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceFLOP(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
+
             if (fold_or_win_chance >= 0.60)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.60) * 10);
             if (fold_or_win_chance >= 0.40)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.40) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.40) * 10);
 
             if (opponentmodel.CurrentAggresiveness() / opponentmodel.AverageAggresiveness() < 0.7)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.50) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.50) * 10);
 
             return 0;
         }
@@ -78,16 +82,18 @@ namespace Villain
         /// <returns></returns>
         private int flop_action_inpos_active(Dealer Mr_Brown)
         {
-            int opponent_bet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponent_bet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             double opponent_commit = opponent_bet / (double)Mr_Brown.pot;
 
             // if winchance is really high, raise
-            double fold_or_win_chance = WinOrFoldChanceFLOP(Mr_Brown);
-            if (fold_or_win_chance > 0.70 || fold_or_win_chance >= opponent_commit * 2)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceFLOP(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
+
+            if (fold_or_win_chance > 0.80 || fold_or_win_chance >= opponent_commit * 2)
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.60) * 10);
 
             // if winchance is about equal to commit, call
-            if (fold_or_win_chance >= opponent_commit * 0.9)
+            if (tuple_winchance.Item1 >= opponent_commit * 0.9)
                 return opponent_bet;
             // if winchance is too low to justify the call, fold
             return 0;
@@ -100,10 +106,10 @@ namespace Villain
         /// <returns></returns>
         private int flop_action_outpos_passive(Dealer Mr_Brown)
         {
-            if (opponentmodel.foldChanceFLOP() > 0.6 & AverageWinChance(Mr_Brown) < 0.4)
-                return (int)(Math.Round(Mr_Brown.pot * 0.5));
+            if (opponentmodel.foldChanceFLOP() < 0.4 & AverageWinChance(Mr_Brown) < 0.6)
+                return (int)(Math.Round(Mr_Brown.virtualpot * 0.5));
             if (opponentmodel.CurrentAggresiveness() / opponentmodel.AverageAggresiveness() < 0.7)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.40) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.40) * 10);
             return 0;
         }
 
@@ -114,16 +120,18 @@ namespace Villain
         /// <returns></returns>
         private int flop_action_outpos_active(Dealer Mr_Brown)
         {
-            int opponent_bet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponent_bet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             double opponent_commit = opponent_bet / (double)Mr_Brown.pot;
 
             // if winchance is really high, raise
-            double fold_or_win_chance = WinOrFoldChanceFLOP(Mr_Brown);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceFLOP(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
+
             if (fold_or_win_chance > 0.70 || fold_or_win_chance >= opponent_commit * 2)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.60) * 10);
 
             // if winchance is about equal to commit, call
-            if (fold_or_win_chance >= opponent_commit * 0.9)
+            if (tuple_winchance.Item1 >= opponent_commit * 0.5)
                 return opponent_bet;
             // if winchance is too low to justify the call, fold
             return 0;
@@ -133,18 +141,18 @@ namespace Villain
         #region turn
         private int turn_action(Dealer Mr_Brown)
         {
-            double potpercbet = (double)(Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit) / (double)Mr_Brown.pot;
+            double potpercbet = (double)(Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit) / (double)(2 * Mr_Brown.players[tp].PotCommit);
 
             // Checked towards me
-            if (am_dealer && Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+            if (am_dealer && Mr_Brown.players[op].PotCommit == Mr_Brown.players[tp].PotCommit)
             {
-                opponentmodel.addTurnRangeCommitACTIVE(0);
+                commits_ranges_current_hand.Add(opponentmodel.addTurnRangeCommitACTIVE(0));
                 return turn_action_inpos_passive(Mr_Brown);
             }
             // Betted / raised towards me
             if (am_dealer)
             {
-                opponentmodel.addTurnRangeCommitACTIVE(potpercbet);
+                commits_ranges_current_hand.Add(opponentmodel.addTurnRangeCommitACTIVE(potpercbet));
                 return turn_action_inpos_active(Mr_Brown);
             }
             // My move; no action yet
@@ -153,7 +161,7 @@ namespace Villain
             // My move; respond to bet / raise
             else
             {
-                opponentmodel.addTurnRangeCommitPASSIVE(potpercbet);
+                commits_ranges_current_hand.Add(opponentmodel.addTurnRangeCommitPASSIVE(potpercbet));
                 return turn_action_outpos_active(Mr_Brown);
             }
         }
@@ -165,13 +173,13 @@ namespace Villain
         /// <returns></returns>
         private int turn_action_inpos_passive(Dealer Mr_Brown)
         {
-            double fold_or_win_chance = WinOrFoldChanceTURN(Mr_Brown);
+            double fold_or_win_chance = WinOrFoldChanceTURN(Mr_Brown).Item2;
             if (fold_or_win_chance >= 0.60)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.60) * 10);
             if (fold_or_win_chance >= 0.40)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.40) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.40) * 10);
             if (opponentmodel.CurrentAggresiveness() / opponentmodel.AverageAggresiveness() < 0.7)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.50) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.50) * 10);
             return 0;
         }
 
@@ -182,16 +190,18 @@ namespace Villain
         /// <returns></returns>
         private int turn_action_inpos_active(Dealer Mr_Brown)
         {
-            int opponent_bet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponent_bet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             double opponent_commit = opponent_bet / (double)Mr_Brown.pot;
 
             // if winchance is really high, raise
-            double fold_or_win_chance = WinOrFoldChanceTURN(Mr_Brown);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceTURN(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
+
             if (fold_or_win_chance > 0.70 || fold_or_win_chance >= opponent_commit * 2)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.60) * 10);
 
             // if winchance is about equal to commit, call
-            if (fold_or_win_chance >= opponent_commit * 0.9)
+            if (tuple_winchance.Item1 >= opponent_commit * 0.5)
                 return opponent_bet;
             // if winchance is too low to justify the call, fold
             return 0;
@@ -204,10 +214,10 @@ namespace Villain
         /// <returns></returns>
         private int turn_action_outpos_passive(Dealer Mr_Brown)
         {
-            if (opponentmodel.foldChanceTURN() > 0.6 & AverageWinChance(Mr_Brown) < 0.4)
-                return (int)(Math.Round(Mr_Brown.pot * 0.5));
+            if (opponentmodel.foldChanceTURN(commits_ranges_current_hand) < 0.40 & AverageWinChance(Mr_Brown) > 0.6)
+                return (int)(Math.Round(Mr_Brown.virtualpot * 0.5));
             if (opponentmodel.CurrentAggresiveness() / opponentmodel.AverageAggresiveness() < 0.7)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.40) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.40) * 10);
             return 0;
         }
 
@@ -218,16 +228,18 @@ namespace Villain
         /// <returns></returns>
         private int turn_action_outpos_active(Dealer Mr_Brown)
         {
-            int opponent_bet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponent_bet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             double opponent_commit = opponent_bet / (double)Mr_Brown.pot;
 
             // if winchance is really high, raise
-            double fold_or_win_chance = WinOrFoldChanceTURN(Mr_Brown);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceTURN(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
+
             if (fold_or_win_chance > 0.70 || fold_or_win_chance >= opponent_commit * 2)
                 return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
 
             // if winchance is about equal to commit, call
-            if (fold_or_win_chance >= opponent_commit * 0.9)
+            if (tuple_winchance.Item1 >= opponent_commit * 0.5)
                 return opponent_bet;
             // if winchance is too low to justify the call, fold
             return 0;
@@ -238,7 +250,7 @@ namespace Villain
         private int river_action(Dealer Mr_Brown)
         {
             // Checked towards me
-            if (am_dealer && Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+            if (am_dealer && Mr_Brown.players[op].PotCommit == Mr_Brown.players[tp].PotCommit)
                 return river_action_inpos_passive(Mr_Brown);
             // Betted / raised towards me
             if (am_dealer)
@@ -258,7 +270,8 @@ namespace Villain
         /// <returns></returns>
         private int river_action_inpos_passive(Dealer Mr_Brown)
         {
-            double fold_or_win_chance = WinOrFoldChanceRIVER(Mr_Brown);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceRIVER(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
             if (fold_or_win_chance >= 0.60)
                 return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
             if (fold_or_win_chance >= 0.40)
@@ -275,16 +288,18 @@ namespace Villain
         /// <returns></returns>
         private int river_action_inpos_active(Dealer Mr_Brown)
         {
-            int opponent_bet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponent_bet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             double opponent_commit = opponent_bet / (double)Mr_Brown.pot;
 
             // if winchance is really high, raise
-            double fold_or_win_chance = WinOrFoldChanceRIVER(Mr_Brown);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceRIVER(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
+
             if (fold_or_win_chance > 0.70 || fold_or_win_chance >= opponent_commit * 2)
                 return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
 
             // if winchance is about equal to commit, call
-            if (fold_or_win_chance >= opponent_commit * 0.9)
+            if (tuple_winchance.Item1 >= opponent_commit * 0.9)
                 return opponent_bet;
             // if winchance is too low to justify the call, fold
             return 0;
@@ -297,7 +312,7 @@ namespace Villain
         /// <returns></returns>
         private int river_action_outpos_passive(Dealer Mr_Brown)
         {
-            if (opponentmodel.foldChanceRIVER() > 0.6 & AverageWinChance(Mr_Brown) < 0.4)
+            if (opponentmodel.foldChanceRIVER(commits_ranges_current_hand) < 0.4 & AverageWinChance(Mr_Brown) > 0.6)
                 return (int)(Math.Round(Mr_Brown.pot * 0.5));
 
             return 0;
@@ -310,64 +325,78 @@ namespace Villain
         /// <returns></returns>
         private int river_action_outpos_active(Dealer Mr_Brown)
         {
-            int opponent_bet = Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit;
+            int opponent_bet = Mr_Brown.players[op].PotCommit - Mr_Brown.players[tp].PotCommit;
             double opponent_commit = opponent_bet / (double)Mr_Brown.pot;
 
             // if winchance is really high, raise
-            double fold_or_win_chance = WinOrFoldChanceRIVER(Mr_Brown);
+            Tuple<double, double> tuple_winchance = WinOrFoldChanceRIVER(Mr_Brown);
+            double fold_or_win_chance = tuple_winchance.Item2;
             if (fold_or_win_chance > 0.70 || fold_or_win_chance >= opponent_commit * 2)
-                return (int)(Math.Round((Mr_Brown.pot / 10) * 0.60) * 10);
+                return (int)(Math.Round((Mr_Brown.virtualpot / 10) * 0.60) * 10);
 
             // if winchance is about equal to commit, call
-            if (fold_or_win_chance >= opponent_commit * 0.9)
+            if (tuple_winchance.Item1 >= opponent_commit * 0.9)
                 return opponent_bet;
             // if winchance is too low to justify the call, fold
             return 0;
         }
         #endregion
 
-        private double WinOrFoldChanceFLOP(Dealer Mr_Brown)
+        // Return <winchance, winorfoldchance>
+        private Tuple<double,double> WinOrFoldChanceFLOP(Dealer Mr_Brown)
         {
+            int b = betStep <= 3 ? 1 : betStep - 2;
             double avgwc = AverageWinChance(Mr_Brown);
-            return avgwc + (1 - avgwc) * opponentmodel.foldChanceFLOP();
+            return new Tuple<double,double>(avgwc, avgwc + ((1 - avgwc) * opponentmodel.foldChanceFLOP())/b);
         }
 
-        private double WinOrFoldChanceTURN(Dealer Mr_Brown)
+        private Tuple<double, double> WinOrFoldChanceTURN(Dealer Mr_Brown)
         {
+            int b = betStep <= 3 ? 1 : betStep - 2;
             double avgwc = AverageWinChance(Mr_Brown);
-            return avgwc + (1 - avgwc) * opponentmodel.foldChanceTURN();
+            return new Tuple<double, double>(avgwc, avgwc + ((1 - avgwc) * opponentmodel.foldChanceTURN(commits_ranges_current_hand))/b);
         }
 
-        private double WinOrFoldChanceRIVER(Dealer Mr_Brown)
+        private Tuple<double, double> WinOrFoldChanceRIVER(Dealer Mr_Brown)
         {
+            int b = betStep <= 3 ? 1 : betStep - 2;
             double avgwc = AverageWinChance(Mr_Brown);
-            return avgwc + (1 - avgwc) * opponentmodel.foldChanceRIVER();
+            return new Tuple<double, double>(avgwc, avgwc + ((1 - avgwc) * opponentmodel.foldChanceRIVER(commits_ranges_current_hand))/b);
         }
 
         private double AverageWinChance(Dealer Mr_Brown)
         {
-            int holecardsamples = 400;
-            int boardsamples = 2000;
+            int b = betStep <= 3 ? 1 : betStep - 2;
+            int holecardsamples = 200;
+            int boardsamples = 500;
+            if (phase == GAME_STATE.turn)
+                boardsamples = 200;
+            if (phase == GAME_STATE.river)
+                boardsamples = 20;
             List<double> probabilities = new List<double>();
 
             // Sample 100 holecards
-            for (int i = 0; i < holecardsamples; i++)
-            {
-                double prob = 0.0;
-                List<Card> hc = GenerateHoleCards(Mr_Brown, opponentmodel.currentRange);
-                // Sample 1000 boards
-                for (int j = 0; j < boardsamples; j++)
+            Parallel.For(0, holecardsamples, (i) =>
                 {
-                    List<Card> board = GenerateBoard(Mr_Brown, hc);
-                    prob += StandardInteraction.IsBetterHand(Mr_Brown.players[1].HoleCards, CardList.ToCardList(hc), CardList.ToCardList(board)) ? 1 : 0;
-                }
-                probabilities.Add(prob / boardsamples);
-            }
+                    double prob = 0.0;
+
+                    List<Card> hc = GenerateHoleCards(Mr_Brown, opponentmodel.currentRange);
+
+                    // Sample 1000 boards
+                    for (int j = 0; j < boardsamples; j++)
+                    {
+                        List<Card> board = GenerateBoard(Mr_Brown, hc);
+                        prob += StandardInteraction.IsBetterHand(Mr_Brown.players[tp].HoleCards, CardList.ToCardList(board), CardList.ToCardList(hc)) ? 1 : 0;
+                    }
+                    probabilities.Add(prob / boardsamples);
+                });
+
             probabilities = probabilities.OrderBy(k => k).ToList();
+         //   double fraction = commits_ranges_current_hand[commits_ranges_current_hand.Count - 1] * 1.4 < 1.0 ? commits_ranges_current_hand[commits_ranges_current_hand.Count - 1] * 1.4 : 1.0;
+            probabilities = probabilities.GetRange(0, (int)(Math.Round(commits_ranges_current_hand[commits_ranges_current_hand.Count - 1] * probabilities.Count)/b));
 
-            probabilities = probabilities.GetRange(0, (int)Math.Round(0.5 * probabilities.Count));
-
-            return opponentmodel.loosenessFactor * probabilities.Average();
+            double ret = probabilities.Average();
+            return ret;
         }
 
         private List<Card> GenerateBoard(Dealer Mr_Brown, List<Card> GeneratedHoleCards)
@@ -376,8 +405,8 @@ namespace Villain
 
             board.Add(GeneratedHoleCards[0]);
             board.Add(GeneratedHoleCards[1]);
-            board.Add(Mr_Brown.players[1].HoleCards[0]);
-            board.Add(Mr_Brown.players[1].HoleCards[1]);
+            board.Add(Mr_Brown.players[tp].HoleCards[0]);
+            board.Add(Mr_Brown.players[tp].HoleCards[1]);
 
             board.Reverse();
 
@@ -397,6 +426,7 @@ namespace Villain
         private List<Card> GenerateHoleCards(Dealer Mr_Brown, int range)
         {
             List<Card> hc = GenerateHoleCards(Mr_Brown);
+
             if (range == 9)
                 return hc;
             for (int i = 0; i < range - 1; i++)
@@ -417,8 +447,9 @@ namespace Villain
         /// <returns></returns>
         private List<Card> GenerateHoleCards(Dealer Mr_Brown)
         {
-            List<Card> current_list = (Mr_Brown.c == null || Mr_Brown.c.Count == 0) ? Mr_Brown.players[1].HoleCards :
-                Mr_Brown.players[1].HoleCards.ConcatReturn(Mr_Brown.c);
+            List<Card> current_list = (Mr_Brown.c == null || Mr_Brown.c.Count == 0) ? Mr_Brown.players[tp].HoleCards.copy() :
+                Mr_Brown.players[tp].HoleCards.copy().ConcatReturn(Mr_Brown.c);
+
 
             Card c1 = GenerateCard(current_list);
             current_list.Add(c1);

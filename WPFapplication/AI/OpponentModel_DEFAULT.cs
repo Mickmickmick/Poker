@@ -10,7 +10,7 @@ namespace Villain
         private double _loosenessFactor = 1.2;
         public double loosenessFactor { get { return _loosenessFactor; } set { _loosenessFactor = value; } }
 
-        List<int> preflopCommits = new List<int>(18) { 400, 200, 100, 60, 60, 60, 60, 40, 40, 40, 40, 20, 20, 20, 0, 0, 0, 0 };
+        List<int> preflopCommits = OpponentModel_START_VALUES.preflopCommits;
 
         public double addPreflopCommit(int amount)
         {
@@ -35,11 +35,12 @@ namespace Villain
             return 0.4;
         }
 
+        public int currentRange { get; set; }
 
         /**************
          * FLOP
          * ************/
-        List<double> flopCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> flopCommitsACTIVE = OpponentModel_START_VALUES.flopCommitsACTIVE;
         public double addFlopRangeCommitACTIVE(double percentage)
         {
             flopCommitsACTIVE.Add(percentage);
@@ -53,7 +54,7 @@ namespace Villain
             return ((first + last) / 2.0) / flopCommitsACTIVE.Count;
         }
 
-        List<double> flopCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> flopCommitsPASSIVE = OpponentModel_START_VALUES.flopCommitsPASSIVE;
         public double addFlopRangeCommitPASSIVE(double percentage)
         {
             flopCommitsPASSIVE.Add(percentage);
@@ -70,7 +71,7 @@ namespace Villain
         /**************
          * TURN
          * ************/
-        List<double> turnCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> turnCommitsACTIVE = OpponentModel_START_VALUES.turnCommitsACTIVE;
         public double addTurnRangeCommitACTIVE(double percentage)
         {
             turnCommitsACTIVE.Add(percentage);
@@ -84,7 +85,7 @@ namespace Villain
             return ((first + last) / 2.0) / turnCommitsACTIVE.Count;
         }
 
-        List<double> turnCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> turnCommitsPASSIVE = OpponentModel_START_VALUES.turnCommitsPASSIVE;
         public double addTurnRangeCommitPASSIVE(double percentage)
         {
             turnCommitsPASSIVE.Add(percentage);
@@ -101,7 +102,7 @@ namespace Villain
         /**************
          * RIVER
          * ************/
-        List<double> riverCommitsACTIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> riverCommitsACTIVE = OpponentModel_START_VALUES.riverCommitsACTIVE;
         public double addRiverRangeCommitACTIVE(double percentage)
         {
             riverCommitsACTIVE.Add(percentage);
@@ -115,7 +116,7 @@ namespace Villain
             return ((first + last) / 2.0) / riverCommitsACTIVE.Count;
         }
 
-        List<double> riverCommitsPASSIVE = new List<double>(15) { 200, 100, 100, 60, 60, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0 };
+        List<double> riverCommitsPASSIVE = OpponentModel_START_VALUES.riverCommitsPASSIVE;
         public double addRiverRangeCommitPASSIVE(double percentage)
         {
             riverCommitsPASSIVE.Add(percentage);
@@ -137,14 +138,21 @@ namespace Villain
             return loosenessFactor * ((double)flopCommitsPASSIVE.FindAll(k => k == 0).Count / (double)flopCommitsPASSIVE.Count);
         }
 
-        public double foldChanceTURN()
+        public double foldChanceTURN(List<double> current_hand_style)
         {
-            return loosenessFactor * ((double)turnCommitsPASSIVE.FindAll(k => k == 0).Count / (double)turnCommitsPASSIVE.Count);
+            return loosenessFactor *
+                ((((double)turnCommitsPASSIVE.FindAll(k => k == 0).Count / (double)turnCommitsPASSIVE.Count)
+                + 0.5 * current_hand_style[current_hand_style.Count - 1]
+                )) / 2;
         }
 
-        public double foldChanceRIVER()
+        public double foldChanceRIVER(List<double> current_hand_style)
         {
-            return loosenessFactor * ((double)riverCommitsPASSIVE.FindAll(k => k == 0).Count / (double)riverCommitsPASSIVE.Count);
+            return loosenessFactor *
+                ((((double)riverCommitsPASSIVE.FindAll(k => k == 0).Count / (double)riverCommitsPASSIVE.Count)
+                + 0.5 * current_hand_style[current_hand_style.Count - 1]
+                + 0.5 * current_hand_style[current_hand_style.Count - 2]
+                )) / 3;
         }
     }
 }

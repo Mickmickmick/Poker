@@ -23,9 +23,14 @@ namespace WPFapplication
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private int COUNTER = 0;
+        private string str = "c:\\Users\\Mick\\Documents\\Poker\\1-2_BENCHMARK.txt";
+        private bool VS_HUMAN = false;
+
         private Player WinnerLastHand;
 
         private AI Villain;
+        private AI Hero;
 
         private Dealer _mrBrown;
         public Dealer Mr_Brown
@@ -51,103 +56,112 @@ namespace WPFapplication
 
         private void UpdateTable()
         {
-            if(_mrBrown.pot > 0)
+            if (VS_HUMAN)
             {
-                Pot.Visibility = Visibility.Visible;
-                Pot.Text = "Total pot: " + _mrBrown.pot.ToString();
-            }
-            else
-                Pot.Visibility = Visibility.Hidden;
-
-            // If one of the players has changed potcommit
-            if (!(pcht.Text == (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString() &&
-                pcvt.Text == (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString()))
-            {
-                if (pcvb.Background == (SolidColorBrush)new BrushConverter().ConvertFromString("BurlyWood"))
+                if (_mrBrown.pot > 0)
                 {
-                    if (_mrBrown.players[0].PotCommit > 0)
-                    {
-                        pchb.Visibility = Visibility.Visible;
-                        pcht.Text = _mrBrown.players[0].PotCommit.ToString();
-                    }
-                    else
-                        pchb.Visibility = Visibility.Hidden;
-
-                    if (_mrBrown.players[1].PotCommit > 0)
-                    {
-                        pcvb.Visibility = Visibility.Visible;
-                        pcvt.Text = _mrBrown.players[1].PotCommit.ToString();
-                    }
-                    else
-                        pcvb.Visibility = Visibility.Hidden;
+                    Pot.Visibility = Visibility.Visible;
+                    Pot.Text = "Total pot: " + _mrBrown.pot.ToString();
                 }
-            }
+                else
+                    Pot.Visibility = Visibility.Hidden;
+
+                // If one of the players has changed potcommit
+                if (!(pcht.Text == (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString() &&
+                    pcvt.Text == (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString()))
+                {
+                    if (pcvb.Background == (SolidColorBrush)new BrushConverter().ConvertFromString("BurlyWood"))
+                    {
+                        if (_mrBrown.players[0].PotCommit > 0)
+                        {
+                            pchb.Visibility = Visibility.Visible;
+                            pcht.Text = _mrBrown.players[0].PotCommit.ToString();
+                        }
+                        else
+                            pchb.Visibility = Visibility.Hidden;
+
+                        if (_mrBrown.players[1].PotCommit > 0)
+                        {
+                            pcvb.Visibility = Visibility.Visible;
+                            pcvt.Text = _mrBrown.players[1].PotCommit.ToString();
+                        }
+                        else
+                            pcvb.Visibility = Visibility.Hidden;
+                    }
+                }
 
 
-            if (_mrBrown.dealer_button.PlayerID == PLAYER.Computer)
-            {
-                VillainDealer.Visibility = Visibility.Visible;
-                HeroDealer.Visibility = Visibility.Hidden; 
-            }
-            if (_mrBrown.dealer_button.PlayerID == PLAYER.User)
-            {
-                VillainDealer.Visibility = Visibility.Hidden;
-                HeroDealer.Visibility = Visibility.Visible; 
-            }
+                if (_mrBrown.dealer_button.PlayerID == PLAYER.Computer)
+                {
+                    VillainDealer.Visibility = Visibility.Visible;
+                    HeroDealer.Visibility = Visibility.Hidden;
+                }
+                if (_mrBrown.dealer_button.PlayerID == PLAYER.User)
+                {
+                    VillainDealer.Visibility = Visibility.Hidden;
+                    HeroDealer.Visibility = Visibility.Visible;
+                }
 
-            if (_mrBrown.players[0].HoleCards != null && _mrBrown.players[0].HoleCards.Count > 0)
-            {
-                Hero1.Source = _mrBrown.players[0].HoleCards[0].GetImageSrc();
-                Hero2.Source = _mrBrown.players[0].HoleCards[1].GetImageSrc();
+                if (_mrBrown.players[0].HoleCards != null && _mrBrown.players[0].HoleCards.Count > 0)
+                {
+                    if (!VS_HUMAN)
+                    {
+                        Villain1.Source = _mrBrown.players[1].HoleCards[0].GetImageSrc();
+                        Villain2.Source = _mrBrown.players[1].HoleCards[1].GetImageSrc();
+                    }
 
-                Hero1.Visibility = Visibility.Visible;
-                Hero2.Visibility = Visibility.Visible;
-                Villain1.Visibility = Visibility.Visible;
-                Villain2.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                Hero1.Visibility = Visibility.Hidden;
-                Hero2.Visibility = Visibility.Hidden;
-                Villain1.Visibility = Visibility.Hidden;
-                Villain2.Visibility = Visibility.Hidden;
-            }
+                    Hero1.Source = _mrBrown.players[0].HoleCards[0].GetImageSrc();
+                    Hero2.Source = _mrBrown.players[0].HoleCards[1].GetImageSrc();
 
-            HeroStack.Text = _mrBrown.players[0].StackSize.ToString();
-            VillainStack.Text = _mrBrown.players[1].StackSize.ToString();
+                    Hero1.Visibility = Visibility.Visible;
+                    Hero2.Visibility = Visibility.Visible;
+                    Villain1.Visibility = Visibility.Visible;
+                    Villain2.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    Hero1.Visibility = Visibility.Hidden;
+                    Hero2.Visibility = Visibility.Hidden;
+                    Villain1.Visibility = Visibility.Hidden;
+                    Villain2.Visibility = Visibility.Hidden;
+                }
 
-            if (_mrBrown.c.Count == 5)
-            {
-                River.Visibility = Visibility.Visible;
-                River.Source = _mrBrown.c[4].GetImageSrc();
-            }
-            else if (_mrBrown.c.Count == 4)
-            {
-                Turn.Visibility = Visibility.Visible;
-                Turn.Source = _mrBrown.c[3].GetImageSrc();
+                HeroStack.Text = _mrBrown.players[0].StackSize.ToString();
+                VillainStack.Text = _mrBrown.players[1].StackSize.ToString();
 
-                River.Visibility = Visibility.Hidden;
-            }
-            else if (_mrBrown.c.Count == 3)
-            {
-                Flop1.Visibility = Visibility.Visible;
-                Flop2.Visibility = Visibility.Visible;
-                Flop3.Visibility = Visibility.Visible;
+                if (_mrBrown.c.Count == 5)
+                {
+                    River.Visibility = Visibility.Visible;
+                    River.Source = _mrBrown.c[4].GetImageSrc();
+                }
+                else if (_mrBrown.c.Count == 4)
+                {
+                    Turn.Visibility = Visibility.Visible;
+                    Turn.Source = _mrBrown.c[3].GetImageSrc();
 
-                Flop1.Source = _mrBrown.c[0].GetImageSrc();
-                Flop2.Source = _mrBrown.c[1].GetImageSrc();
-                Flop3.Source = _mrBrown.c[2].GetImageSrc();
+                    River.Visibility = Visibility.Hidden;
+                }
+                else if (_mrBrown.c.Count == 3)
+                {
+                    Flop1.Visibility = Visibility.Visible;
+                    Flop2.Visibility = Visibility.Visible;
+                    Flop3.Visibility = Visibility.Visible;
 
-                Turn.Visibility = Visibility.Hidden;
-                River.Visibility = Visibility.Hidden;
-            }
-            else
-            {
-                Flop1.Visibility = Visibility.Hidden;
-                Flop2.Visibility = Visibility.Hidden;
-                Flop3.Visibility = Visibility.Hidden;
-                Turn.Visibility = Visibility.Hidden;
-                River.Visibility = Visibility.Hidden;
+                    Flop1.Source = _mrBrown.c[0].GetImageSrc();
+                    Flop2.Source = _mrBrown.c[1].GetImageSrc();
+                    Flop3.Source = _mrBrown.c[2].GetImageSrc();
+
+                    Turn.Visibility = Visibility.Hidden;
+                    River.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    Flop1.Visibility = Visibility.Hidden;
+                    Flop2.Visibility = Visibility.Hidden;
+                    Flop3.Visibility = Visibility.Hidden;
+                    Turn.Visibility = Visibility.Hidden;
+                    River.Visibility = Visibility.Hidden;
+                }
             }
         }
 
@@ -177,12 +191,40 @@ namespace WPFapplication
             // init dealer
             Mr_Brown = new Dealer(Participants);
 
-            Villain = new AI();
+          //  Random r = new Random();
+
+            Villain = new AI(2, 1);
+
+            if (!VS_HUMAN)
+                Hero = new AI(1, 0);
+
+            System.IO.StreamWriter file = new System.IO.StreamWriter(str, true);
+            file.WriteLine("Hero: 1th, Villain: 2st\n\n");
+            file.Close();
         }
 
         // New hand (eventually could be automatic)
         private void New_Hand_clicked(object sender, RoutedEventArgs e)
         {
+            nh();
+        }
+
+        private void nh()
+        {
+            COUNTER++;
+            if (COUNTER > 650)
+            {
+                Villain = new AI(2, 1);
+                Hero = new AI(1, 0);
+
+                System.IO.StreamWriter file = new System.IO.StreamWriter(str, true);
+                file.WriteLine("Hero: 1th, Villain: 2st\n\n");
+                file.Close();
+            }
+            if (COUNTER % 100 == 0)
+            {
+
+            }
             if ((string)newhand.Content == "New Game")
             {
                 InitializeGame();
@@ -190,10 +232,16 @@ namespace WPFapplication
                 return;
             }
             newhand.IsEnabled = false;
-            Villain1.Source = Card.BackSrc();
-            Villain2.Source = Card.BackSrc();
-            if(Mr_Brown.players[0].HoleCards != null)
+
+     //       Villain1.Source = Card.BackSrc();
+       //     Villain2.Source = Card.BackSrc();
+            if (Mr_Brown.players[0].HoleCards != null)
                 Mr_Brown.WrapUp(WinnerLastHand);
+            if (!VS_HUMAN)
+            {
+                Mr_Brown.players[0].StackSize = 1500;
+                Mr_Brown.players[1].StackSize = 1500;
+            }
             SetupHand();
         }
 
@@ -229,6 +277,7 @@ namespace WPFapplication
         // Bet round for everything
         public void BetRound()
         {
+
             if (betStep == 0 && Mr_Brown.c.Count > 0)
                 Mr_Brown.whosturn = Mr_Brown.OtherPlayer(Mr_Brown.dealer_button);
             else if (betStep > 0)
@@ -265,6 +314,7 @@ namespace WPFapplication
 
         private void WrapUp()
         {
+            Villain.phase = GAME_STATE.wrapup;
             betStep = 0;
             noBetPlaced = false;
             UpdateTable();
@@ -272,6 +322,9 @@ namespace WPFapplication
             WinnerLastHand = Mr_Brown.WhoWins();
             // also deals with buttons
             DisplayOutcomeGUI(WinnerLastHand);
+            if(!VS_HUMAN)
+                nh();
+            
         }
 
         private bool EqualPotCommits()
@@ -305,7 +358,10 @@ namespace WPFapplication
         {
             // Players turn
             if (Mr_Brown.whosturn.PlayerID == PLAYER.User)
-                CheckRaiseGUI();
+                if (VS_HUMAN)
+                    CheckRaiseGUI();
+                else
+                    GetMoveFromHeroAI(Mr_Brown);
             // Computers turn
             else
             {
@@ -317,7 +373,12 @@ namespace WPFapplication
         private void AskFoldCallRaise()
         {
             if (Mr_Brown.whosturn.PlayerID == PLAYER.User)
-                FoldCallRaiseGUI();
+            {
+                if (VS_HUMAN)
+                    FoldCallRaiseGUI();
+                else
+                    GetMoveFromHeroAI(Mr_Brown);
+            }
             else
             {
                 NoButtonsGUI();
@@ -350,6 +411,20 @@ namespace WPFapplication
             {
                 int amount = (int)e.Result;
                 Mr_Brown.AcceptBet(Mr_Brown.players[1], amount);
+
+
+                MOVE mov;
+                if (amount > 0 && Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+                    mov = MOVE.call;
+                else if (amount > 0)
+                    mov = MOVE.bet_raise;
+                else if (Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+                    mov = MOVE.check;
+                else
+                    mov = MOVE.fold;
+
+                Hero.UpdateMove(mov, DeterminePhase(Mr_Brown), betStep, IsPlayersFirstTurn());
+
                 // If player has more invested than comp, comp folded/checked/called
                 if (Mr_Brown.players[0].PotCommit - Mr_Brown.players[1].PotCommit >= 0)
                     noBetPlaced = true;
@@ -373,7 +448,8 @@ namespace WPFapplication
 
         void bgWorker_Wait(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(1000);
+           // if(VS_HUMAN)
+                Thread.Sleep(1000);
         }
 
         void bgWorker_WaitCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -385,6 +461,66 @@ namespace WPFapplication
             else
             {
                 BetRound();
+            }
+        }
+
+        public void GetMoveFromHeroAI(Dealer Mr_Brown)
+        {
+            BackgroundWorker bgWorker;
+            bgWorker = new BackgroundWorker();
+            bgWorker.DoWork += new DoWorkEventHandler(bgWorker_DoHeroWork);
+            bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgWorker_RunHeroWorkerCompleted);
+
+            bgWorker.RunWorkerAsync();
+        }
+
+        void bgWorker_DoHeroWork(object sender, DoWorkEventArgs e)
+        {
+            e.Result = Hero.GetMove(Mr_Brown, betStep);
+        }
+
+        void bgWorker_RunHeroWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                MessageBox.Show(e.Error.Message);
+            }
+            else
+            {
+                int amount = (int)e.Result;
+                Mr_Brown.AcceptBet(Mr_Brown.players[0], amount);
+
+                MOVE mov;
+                if(amount > 0 && Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+                    mov = MOVE.call;
+                else if(amount > 0)
+                    mov = MOVE.bet_raise;
+                else if(Mr_Brown.players[0].PotCommit == Mr_Brown.players[1].PotCommit)
+                    mov = MOVE.check;
+                else
+                    mov = MOVE.fold;
+
+                Villain.UpdateMove(mov, DeterminePhase(Mr_Brown), betStep, IsPlayersFirstTurn());
+
+                UpdateTable();
+                // If player has more invested than comp, comp folded/checked/called
+                if (Mr_Brown.players[1].PotCommit - Mr_Brown.players[0].PotCommit >= 0)
+                    noBetPlaced = true;
+                else
+                    noBetPlaced = false;
+
+                if (Mr_Brown.players[1].PotCommit - Mr_Brown.players[0].PotCommit > 0)
+                    betStep = 100;
+
+                VillainActionGUI(amount);
+
+                BackgroundWorker bgWorker;
+                bgWorker = new BackgroundWorker();
+                bgWorker.DoWork += new DoWorkEventHandler(bgWorker_Wait);
+                bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgWorker_WaitCompleted);
+
+                bgWorker.RunWorkerAsync();
+                //      BetRound();
             }
         }
 
@@ -423,49 +559,78 @@ namespace WPFapplication
         /// <param name="winner"></param>
         private void DisplayOutcomeGUI(Player winner)
         {
-            HandEvaluator h = new HandEvaluator(winner.HoleCards);
-            winner_pane.Text = winner == null ? "Split pot" : winner.PlayerID.ToString() + " wins";
+            if (winner == null)
+            {
+                winner_pane.Text = "Split pot";
+            }
+            else
+            {
+                winner_pane.Text = winner.PlayerID.ToString() + " wins";
+                HandEvaluator h = new HandEvaluator(winner.HoleCards);
+
+                System.IO.StreamWriter file = new System.IO.StreamWriter(str, true);
+                file.WriteLine(winner.PlayerID.ToString() + " " + Mr_Brown.smallpot);
+                file.Close();
+            }
+           
+            
 
             // If showdown
             if(Mr_Brown.c.Count == 5 && EqualPotCommits())
             {
-                Villain1.Source = Mr_Brown.players[1].HoleCards[0].GetImageSrc();
-                Villain2.Source = Mr_Brown.players[1].HoleCards[1].GetImageSrc();
-                winner_pane.Text += "\n" + h.rank.ToString();
+                
+           //     Villain1.Source = Mr_Brown.players[1].HoleCards[0].GetImageSrc();
+           //     Villain2.Source = Mr_Brown.players[1].HoleCards[1].GetImageSrc();
+
+                if (winner != null)
+                {
+                    HandEvaluator h = new HandEvaluator(winner.HoleCards);
+                    winner_pane.Text += "\n" + h.rank.ToString();
+                }
             }
             
             winner_pane.Visibility = Visibility.Visible;
 
             SolidColorBrush redBrush = (SolidColorBrush)new BrushConverter().ConvertFromString("Red");
             SolidColorBrush greenBrush = (SolidColorBrush)new BrushConverter().ConvertFromString("Green");
-
-            if (winner.PlayerID == PLAYER.User)
+            if (winner == null)
             {
-                pcht.Text = (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString();
-                pcvt.Text = "0";
-                pchb.Background = greenBrush;
-                pcvb.Background = redBrush;
+
             }
             else
             {
-                pcvt.Text = (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString();
-                pcht.Text = "0";
-                pchb.Background = redBrush;
-                pcvb.Background = greenBrush;
-            }
 
-            //NoButtonsGUI();
-            if (Mr_Brown.players[0].StackSize != 0 && Mr_Brown.players[1].StackSize != 0)
-                newhand.Visibility = Visibility.Visible;
-
-            else
+                if (winner.PlayerID == PLAYER.User)
+                {
+                    pcht.Text = (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString();
+                    pcvt.Text = "0";
+                    pchb.Background = greenBrush;
+                    pcvb.Background = redBrush;
+                }
+                else
+                {
+                    pcvt.Text = (Mr_Brown.players[0].PotCommit + Mr_Brown.players[1].PotCommit).ToString();
+                    pcht.Text = "0";
+                    pchb.Background = redBrush;
+                    pcvb.Background = greenBrush;
+                }
+             }
+            
+            // if     player is down and other player won hand
+            if (winner != null)
             {
-                string winnerstring = Mr_Brown.players[0].StackSize == 0 ? Mr_Brown.players[1].PlayerID.ToString() : Mr_Brown.players[0].PlayerID.ToString();
-                villainActText.Text = "Game over, " + winnerstring + " won!";
-                newhand.Content = "New Game";
-                newhand.Visibility = Visibility.Visible;
+                if ((Mr_Brown.players[0].StackSize == 0 && Mr_Brown.players[1].PlayerID == winner.PlayerID) ||
+                    (Mr_Brown.players[1].StackSize == 0 && Mr_Brown.players[0].PlayerID == winner.PlayerID))
+                {
+                    villainActText.Text = "Game over, " + winner.PlayerID.ToString() + " won!";
+                    // newhand.Content = "New Game";
+                    newhand.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    newhand.Visibility = Visibility.Visible;
+                }
             }
-
             UpdateTable();
         }
 
@@ -529,11 +694,14 @@ namespace WPFapplication
             int short_stack = Mr_Brown.players[0].StackSize - prevBet < Mr_Brown.players[1].StackSize ?
                 Mr_Brown.players[0].StackSize : Mr_Brown.players[1].StackSize;
 
+            int pc = Mr_Brown.players[0].StackSize - prevBet < Mr_Brown.players[1].StackSize ?
+                Mr_Brown.players[0].PotCommit : Mr_Brown.players[1].PotCommit;
+
             if (short_stack > Mr_Brown.small_blind * 2)
             {
                 
                 RaiseSlider.Minimum = prevBet + (Mr_Brown.small_blind * 2);
-                RaiseSlider.Maximum = prevBet + short_stack;
+                RaiseSlider.Maximum = pc + short_stack;
             }
             else if(short_stack > 0)
             {
@@ -567,7 +735,7 @@ namespace WPFapplication
             NoButtonsGUI();
             noBetPlaced = true;
             Mr_Brown.AcceptBet(Mr_Brown.players[0], bet);
-
+            Villain.preflopcommit(Mr_Brown);
             BetRound();
         }
 
@@ -578,6 +746,7 @@ namespace WPFapplication
             noBetPlaced = true;
             NoButtonsGUI();
             Mr_Brown.AcceptBet(Mr_Brown.players[0], 0);
+            Villain.preflopcommit(Mr_Brown);
             BetRound();
         }
 
@@ -611,7 +780,7 @@ namespace WPFapplication
             NoButtonsGUI();
             noBetPlaced = false;
             Mr_Brown.AcceptBet(Mr_Brown.players[0], (int)RaiseSlider.Value);
-            
+            Villain.preflopcommit(Mr_Brown);
             BetRound();
         }
 

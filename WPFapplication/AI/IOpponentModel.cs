@@ -7,6 +7,8 @@ namespace Villain
 {
     interface IOpponentModel
     {
+        int currentRange { get; set; }
+
         double loosenessFactor { get; set; }
 
         void UpdateMove(GameMechanics.MOVE move, GameMechanics.GAME_STATE gamestate, int betTurn, bool NewRound);
@@ -24,7 +26,7 @@ namespace Villain
         double addRiverRangeCommitPASSIVE(double percentage);
 
         double foldChanceFLOP();
-        double foldChanceTURN();
-        double foldChanceRIVER();
+        double foldChanceTURN(List<double> current_hand_style);
+        double foldChanceRIVER(List<double> current_hand_style);
     }
 }

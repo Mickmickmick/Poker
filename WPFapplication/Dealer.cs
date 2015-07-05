@@ -20,6 +20,27 @@ namespace GameMechanics
         {
             get { return players[0].PotCommit + players[1].PotCommit; }
         }
+
+        public int virtualpot
+        {
+            get {
+                if(players[0].PotCommit >= players[1].PotCommit)
+                    return players[0].PotCommit * 2;
+                return players[1].PotCommit * 2;
+            }
+
+
+        }
+        public int smallpot
+        {
+            get
+            {
+                if(players[0].PotCommit >= players[1].PotCommit)
+                    return players[1].PotCommit * 2;
+                return players[0].PotCommit * 2;
+            }
+        }
+
         public CommunityCards c;
         public GAME_STATE game_state;
         public Player whosturn;
@@ -44,6 +65,9 @@ namespace GameMechanics
         {           
             foreach (Player p in players)
                 p.HoleCards = new HoleCards(d);
+            if(players[0].HoleCards.Count > 2 || players[1].HoleCards.Count > 2)
+            {
+            }
         }
 
         public void AcceptBet(Player p, int amount)
